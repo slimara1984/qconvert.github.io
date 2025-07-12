@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="description" content="QuickConvert - მარტივი და სწრაფი გამოსახულების კონვერტერი და კროპერი. გადმოაჭერი, გადაკეთე და გადმოწერე მარტივად!">
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>QuickConvert – Crop & Convert Images, JPG, PNG, PDF</title>
+
+<!-- SEO დამატებები -->
+<meta name="description" content="QuickConvert – crop images, convert JPG or PNG to PDF, and extract images from PDFs easily online.">
+<meta name="keywords" content="image cropper, jpg to pdf, png to pdf, pdf to jpg, passport photo crop, convert images, QuickConvert online tool">
+<meta name="author" content="QuickConvert">
+<link rel="canonical" href="https://quickconvert.vercel.app/" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:title" content="QuickConvert – Image Crop & Converter Tool" />
+<meta property="og:description" content="Crop passport-sized photos or convert JPG/PNG/PDF files instantly online – no download needed." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://quickconvert.vercel.app/" />
+<meta property="og:image" content="https://quickconvert.vercel.app/og-image.jpg" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="QuickConvert – Crop & Convert JPG/PNG/PDF" />
+<meta name="twitter:description" content="Free online tool for cropping images and converting JPG, PNG, PDF files." />
+<meta name="twitter:image" content="https://quickconvert.vercel.app/og-image.jpg" />
+
+<!-- Favicon -->
+<link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+
+  body {
+    font-family: 'Poppins', Arial, sans-serif;
+    text-align: center;
+    padding: 30px;
+    background: #f9fbfd;
+    color: #333;
+  }
+  h1 {
+    font-size: 3em;
+    background: linear-gradient(90deg, #007bff, #00c6ff, #007bff);
+    background-size: 200% 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientAnimation 5s ease infinite;
+    margin-bottom: 40px;
+    user-select: none;
+  }
+
+  @keyframes gradientAnimation {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+
+  .tab {
+    display: none;
+    margin-top: 20px;
+    background: white;
+    padding: 25px 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.15);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .tab.active {
+    display: block;
+  }
+  .btn {
+    padding: 12px 26px;
+    margin: 10px 8px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1em;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+  .btn:hover {
+    background: #0056b3;
+    box-shadow: 0 6px 18px rgba(0, 86, 179, 0.5);
+  }
+  select, input[type="file"] {
+    margin: 12px 0;
+    padding: 10px;
+    font-size: 1em;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+    outline-offset: 2px;
+  }
+  select:focus, input[type="file"]:focus {
+    border-color: #00c6ff;
+    outline: none;
+  }
+  #cropContainer {
+    display: inline-block;
+    max-width: 700px;
+    max-height: 700px;
+    border: 3px solid #007bff;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    background: #e6f0ff;
+    box-shadow: 0 4px 14px rgba(0, 123, 255, 0.2);
+  }
+  #croppingImage {
+    display: block;
+    max-width: 100%;
+    max-height: 700px;
+    user-select: none;
+    border-radius: 12px;
+  }
+  #croppedPreview img {
+    max-width: 90vw;
+    margin-top: 20px;
+    border: 1.5px solid #007bff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 123, 255, 0.25);
+  }
+  label {
+    font-weight: 600;
+    font-size: 1.1em;
+  }
+  h2 {
+    font-weight: 700;
+    font-size: 1.8em;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .tab-icon {
+    width: 36px;
+    height: 36px;
+    display: inline-block;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  #cropTab h2 .tab-icon {
+    background-image: url('https://cdn-icons-png.flaticon.com/512/2913/2913460.png');
+  }
+  #jpgpdf h2 .tab-icon {
+    background-image: url('https://cdn-icons-png.flaticon.com/512/888/888857.png');
+  }
+  #pngpdf h2 .tab-icon {
+    background-image: url('https://cdn-icons-png.flaticon.com/512/888/888876.png');
+  }
+  #pdftojpg h2 .tab-icon {
+    background-image: url('https://cdn-icons-png.flaticon.com/512/337/337946.png');
+  }
+  #pdftopng h2 .tab-icon {
+    background-image: url('https://cdn-icons-png.flaticon.com/512/337/337946.png');
+  }
+</style>
+</head>
+<body>
+
+<h1>QuickConvert</h1>
+<div>
+  <button class="btn" onclick="showTab('cropTab')">Image Crop</button>
+  <button class="btn" onclick="showTab('jpgpdf')">JPG → PDF</button>
+  <button class="btn" onclick="showTab('pngpdf')">PNG → PDF</button>
+  <button class="btn" onclick="showTab('pdftojpg')">PDF → JPG</button>
+  <button class="btn" onclick="showTab('pdftopng')">PDF → PNG</button>
+</div>
+
+<!-- Crop Tab -->
+<div id="cropTab" class="tab active">
+  <h2><span class="tab-icon"></span>📐 Image Crop with Standard Sizes & Manual Drag</h2>
+  <input type="file" accept="image/*" id="cropInput" />
+  <br />
+  <label for="stdSize">Select standard size (will set fixed aspect ratio & auto crop box):</label><br />
+  <select id="stdSize" title="Choose a standard size">
+    <option value="">-- None -- (Free Crop)</option>
+    <option value="passport">Passport (3.5×4.5 cm)</option>
+    <option value="us_passport">US Passport (2×2 in)</option>
+    <option value="india_passport">India Passport (3.5×3.5 cm)</option>
+    <option value="eu_id">EU ID (3.7×4.7 cm)</option>
+    <option value="3x4">3×4 cm</option>
+  </select>
+  <br />
+  <label for="outputFormat">Select output format:</label><br />
+  <select id="outputFormat">
+    <option value="jpeg">JPEG</option>
+    <option value="png">PNG</option>
+    <option value="pdf">PDF</option>
+  </select>
+  <br /><br />
+
+  <div id="cropContainer">
+    <img id="croppingImage" alt="Upload an image to crop" />
+  </div>
+
+  <br />
+  <button class="btn" onclick="cropAndDownload()">Crop & Download</button>
+
+  <div id="croppedPreview"></div>
+</div>
+
+<!-- JPG to PDF -->
+<div id="jpgpdf" class="tab">
+  <h2><span class="tab-icon"></span>📸 JPG to PDF</h2>
+  <input type="file" multiple accept="image/jpeg" id="jpgInput" /><br />
+  <button class="btn" onclick="convertImagesToPDF('jpgInput')">Convert & Download</button>
+</div>
+
+<!-- PNG to PDF -->
+<div id="pngpdf" class="tab">
+  <h2><span class="tab-icon"></span>🖼️ PNG to PDF</h2>
+  <input type="file" multiple accept="image/png" id="pngInput" /><br />
+  <button class="btn" onclick="convertImagesToPDF('pngInput')">Convert & Download</button>
+</div>
+
+<!-- PDF to JPG -->
+<div id="pdftojpg" class="tab">
+  <h2><span class="tab-icon"></span>🔁 PDF to JPG</h2>
+  <input type="file" accept="application/pdf" id="pdfToJpgInput" /><br />
+  <button class="btn" onclick="convertPDF('jpg')">Convert & Show</button><br />
+  <div id="jpgOutput"></div>
+</div>
+
+<!-- PDF to PNG -->
+<div id="pdftopng" class="tab">
+  <h2><span class="tab-icon"></span>🔁 PDF to PNG</h2>
+  <input type="file" accept="application/pdf" id="pdfToPngInput" /><br />
+  <button class="btn" onclick="convertPDF('png')">Convert & Show</button><br />
+  <div id="pngOutput"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+
+<script>
+  let cropper;
+
+  function showTab(id) {
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  const DPI = 96;
+
+  const stdFormats = {
+    passport: { w: 3.5, h: 4.5, unit: 'cm' },
+    us_passport: { w: 2, h: 2, unit: 'in' },
+    india_passport: { w: 3.5, h: 3.5, unit: 'cm' },
+    eu_id: { w: 3.7, h: 4.7, unit: 'cm' },
+    "3x4": { w: 3, h: 4, unit: 'cm' }
+  };
+
+  function toPixels(value, unit) {
+    if (unit === 'cm') return value * DPI / 2.54;
+    if (unit === 'in') return value * DPI;
+    return value;
+  }
+
+  document.getElementById('cropInput').addEventListener('change', e => {
+    if (e.target.files.length === 0) return;
+
+    const file = e.target.files[0];
+    const img = document.getElementById('croppingImage');
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      img.src = reader.result;
+      img.style.display = 'block';
+
+      if (cropper) cropper.destroy();
+
+      cropper = new Cropper(img, {
+        viewMode: 1,
+        autoCropArea: 1,
+        movable: true,
+        zoomable: true,
+        scalable: false,
+        cropBoxResizable: true,
+        aspectRatio: NaN,
+        ready() {
+          const val = document.getElementById('stdSize').value;
+          if (val) applyStandardCrop(val);
+        }
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('stdSize').addEventListener('change', e => {
+    if (!cropper) return;
+
+    const val = e.target.value;
+    if (!val) {
+      cropper.setAspectRatio(NaN);
+      return;
+    }
+
+    applyStandardCrop(val);
+  });
+
+  function applyStandardCrop(val) {
+    if (!cropper) return;
+    if (!stdFormats[val]) return;
+
+    const format = stdFormats[val];
+    const imgData = cropper.getImageData();
+
+    const targetW = toPixels(format.w, format.unit);
+    const targetH = toPixels(format.h, format.unit);
+
+    const aspectRatio = targetW / targetH;
+    cropper.setAspectRatio(aspectRatio);
+
+    const scaleX = imgData.width / imgData.naturalWidth;
+    const scaleY = imgData.height / imgData.naturalHeight;
+
+    let cropBoxWidth = targetW * scaleX;
+    let cropBoxHeight = targetH * scaleY;
+
+    if (cropBoxWidth > imgData.width || cropBoxHeight > imgData.height) {
+      const widthRatio = imgData.width / cropBoxWidth;
+      const heightRatio = imgData.height / cropBoxHeight;
+      const ratio = Math.min(widthRatio, heightRatio);
+      cropBoxWidth *= ratio;
+      cropBoxHeight *= ratio;
+    }
+
+    const cropBoxLeft = (imgData.width - cropBoxWidth) / 2;
+    const cropBoxTop = (imgData.height - cropBoxHeight) / 2;
+
+    cropper.setCropBoxData({
+      left: cropBoxLeft,
+      top: cropBoxTop,
+      width: cropBoxWidth,
+      height: cropBoxHeight
+    });
+  }
+
+  async function cropAndDownload() {
+    if (!cropper) return alert('Upload an image and select crop area.');
+
+    const canvas = cropper.getCroppedCanvas({
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high'
+    });
+    if (!canvas) return alert('Failed to crop image.');
+
+    const format = document.getElementById('outputFormat').value;
+    const preview = document.getElementById('croppedPreview');
+    preview.innerHTML = '';
+
+    if (format === 'pdf') {
+      const dataUrl = canvas.toDataURL('image/png');
+      const pdfDocDefinition = {
+        pageMargins: [10],
+        pageSize: { width: canvas.width * 0.75, height: canvas.height * 0.75 },
+        content: [{ image: dataUrl, width: canvas.width * 0.75 }]
+      };
+      const pdfDoc = pdfMake.createPdf(pdfDocDefinition);
+      pdfDoc.getDataUrl((url) => {
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.width = '90%';
+        iframe.height = '400';
+        preview.appendChild(iframe);
+      });
+      pdfDoc.download('cropped.pdf');
+    } else {
+      const mime = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+      const imgEl = new Image();
+      imgEl.src = canvas.toDataURL(mime);
+      preview.appendChild(imgEl);
+      canvas.toBlob((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `cropped.${format}`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }, mime, 0.95);
+    }
+  }
+
+  async function convertImagesToPDF(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input.files.length) return alert("Select at least one image.");
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight(), m = 10;
+
+    for (let i = 0; i < input.files.length; i++) {
+      const file = input.files[i];
+      const img = await new Promise(res => {
+        const fr = new FileReader();
+        fr.onload = () => {
+          const i2 = new Image();
+          i2.onload = () => res(i2);
+          i2.src = fr.result;
+        };
+        fr.readAsDataURL(file);
+      });
+
+      let w = pw - 2 * m;
+      let h = img.height * w / img.width;
+      if (h > ph - 2 * m) {
+        h = ph - 2 * m;
+        w = img.width * h / img.height;
+      }
+
+      const cn = document.createElement('canvas');
+      cn.width = img.width; cn.height = img.height;
+      cn.getContext('2d').drawImage(img, 0, 0);
+      const data = cn.toDataURL(file.type);
+
+      if (i) pdf.addPage();
+      pdf.addImage(data, file.type.includes('png') ? 'PNG' : 'JPEG', m, m, w, h);
+    }
+    pdf.save("converted.pdf");
+  }
+
+  async function convertPDF(format) {
+    const input = document.getElementById(format === 'jpg' ? 'pdfToJpgInput' : 'pdfToPngInput');
+    const output = document.getElementById(format === 'jpg' ? 'jpgOutput' : 'pngOutput');
+    if (!input.files.length) return alert("Select a PDF file.");
+    output.innerHTML = 'Converting...';
+
+    try {
+      const file = input.files[0];
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      output.innerHTML = '';
+
+      for (let i = 1; i <= pdfDoc.numPages; i++) {
+        const page = await pdfDoc.getPage(i);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        await page.render({ canvasContext: context, viewport }).promise;
+
+        const img = new Image();
+        img.src = canvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png');
+        img.style.margin = '10px';
+        img.style.maxWidth = '90vw';
+        output.appendChild(img);
+      }
+    } catch (e) {
+      output.innerHTML = 'Error converting PDF: ' + e.message;
+    }
+  }
+</script>
+
+</body>
+</html>
