@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="description" content="QuickConvert - მარტივი და სწრაფი გამოსახულების კონვერტერი და კროპერი. გადმოაჭერი, გადაკეთე და გადმოწერე მარტივად!">
-
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="QuickConvert - მარტივი და სწრაფი გამოსახულების კონვერტერი და კროპერი. გადმოაჭერი, გადაკეთე და გადმოწერე მარტივად!">
 <title>QuickConvert – Crop & Convert Images, JPG, PNG, PDF</title>
 
 <!-- SEO დამატებები -->
-<meta name="description" content="QuickConvert – crop images, convert JPG or PNG to PDF, and extract images from PDFs easily online.">
 <meta name="keywords" content="image cropper, jpg to pdf, png to pdf, pdf to jpg, passport photo crop, convert images, QuickConvert online tool">
 <meta name="author" content="QuickConvert">
 <link rel="canonical" href="https://quickconvert.vercel.app/" />
@@ -33,12 +31,21 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
 
+  /* Reset & base */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
   body {
     font-family: 'Poppins', Arial, sans-serif;
     text-align: center;
-    padding: 30px;
+    padding: 30px 20px;
     background: #f9fbfd;
     color: #333;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   h1 {
     font-size: 3em;
@@ -48,8 +55,12 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientAnimation 5s ease infinite;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     user-select: none;
+    white-space: nowrap;
+    max-width: 95vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   @keyframes gradientAnimation {
@@ -58,20 +69,7 @@
     100% {background-position: 0% 50%;}
   }
 
-  .tab {
-    display: none;
-    margin-top: 20px;
-    background: white;
-    padding: 25px 30px;
-    border-radius: 16px;
-    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.15);
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .tab.active {
-    display: block;
-  }
+  /* Buttons */
   .btn {
     padding: 12px 26px;
     margin: 10px 8px;
@@ -85,11 +83,42 @@
     box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
     transition: background 0.3s ease, box-shadow 0.3s ease;
     user-select: none;
+    white-space: nowrap;
   }
-  .btn:hover {
+  .btn:hover, .btn:focus {
     background: #0056b3;
     box-shadow: 0 6px 18px rgba(0, 86, 179, 0.5);
+    outline: none;
   }
+
+  /* Button container for wrapping */
+  div.buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+
+  /* Tabs */
+  .tab {
+    display: none;
+    margin-top: 20px;
+    background: white;
+    padding: 25px 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.15);
+    max-width: 800px;
+    width: 95vw;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-wrap: break-word;
+  }
+  .tab.active {
+    display: block;
+  }
+
+  /* Inputs & selects */
   select, input[type="file"] {
     margin: 12px 0;
     padding: 10px;
@@ -98,11 +127,21 @@
     border-radius: 8px;
     transition: border-color 0.3s ease;
     outline-offset: 2px;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
   }
   select:focus, input[type="file"]:focus {
     border-color: #00c6ff;
     outline: none;
   }
+
+  label {
+    font-weight: 600;
+    font-size: 1.1em;
+  }
+
+  /* Crop container */
   #cropContainer {
     display: inline-block;
     max-width: 700px;
@@ -113,6 +152,7 @@
     position: relative;
     background: #e6f0ff;
     box-shadow: 0 4px 14px rgba(0, 123, 255, 0.2);
+    margin-top: 15px;
   }
   #croppingImage {
     display: block;
@@ -121,6 +161,8 @@
     user-select: none;
     border-radius: 12px;
   }
+
+  /* Cropped preview */
   #croppedPreview img {
     max-width: 90vw;
     margin-top: 20px;
@@ -128,10 +170,8 @@
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 123, 255, 0.25);
   }
-  label {
-    font-weight: 600;
-    font-size: 1.1em;
-  }
+
+  /* Headings inside tabs */
   h2 {
     font-weight: 700;
     font-size: 1.8em;
@@ -140,6 +180,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    flex-wrap: wrap;
   }
   .tab-icon {
     width: 36px;
@@ -159,29 +200,81 @@
   #pngpdf h2 .tab-icon {
     background-image: url('https://cdn-icons-png.flaticon.com/512/888/888876.png');
   }
-  #pdftojpg h2 .tab-icon {
+  #pdftojpg h2 .tab-icon, #pdftopng h2 .tab-icon {
     background-image: url('https://cdn-icons-png.flaticon.com/512/337/337946.png');
   }
-  #pdftopng h2 .tab-icon {
-    background-image: url('https://cdn-icons-png.flaticon.com/512/337/337946.png');
+
+  /* Responsive tweaks */
+  @media (max-width: 600px) {
+    body {
+      padding: 15px 10px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 25px;
+      white-space: normal;
+    }
+    .btn {
+      padding: 10px 18px;
+      margin: 8px 5px;
+      font-size: 0.9em;
+      border-radius: 6px;
+      box-shadow: 0 3px 8px rgba(0, 123, 255, 0.2);
+      white-space: normal;
+      min-width: 100px;
+      flex-grow: 1;
+      max-width: 160px;
+    }
+    div.buttons-container {
+      gap: 8px;
+    }
+    select, input[type="file"] {
+      width: 100%;
+      font-size: 1em;
+      padding: 8px 10px;
+      margin: 8px 0;
+      max-width: 100%;
+    }
+    #cropContainer {
+      max-width: 100%;
+      max-height: 350px;
+      border-width: 2px;
+    }
+    #croppingImage {
+      max-height: 350px;
+    }
+    #croppedPreview img {
+      max-width: 100vw;
+      margin-top: 15px;
+      border-width: 1px;
+    }
+    h2 {
+      font-size: 1.4em;
+      margin-bottom: 12px;
+      gap: 6px;
+    }
+    .tab {
+      padding: 15px 20px;
+    }
   }
 </style>
 </head>
 <body>
 
-<h1>QuickConvert</h1>
-<div>
-  <button class="btn" onclick="showTab('cropTab')">Image Crop</button>
-  <button class="btn" onclick="showTab('jpgpdf')">JPG → PDF</button>
-  <button class="btn" onclick="showTab('pngpdf')">PNG → PDF</button>
-  <button class="btn" onclick="showTab('pdftojpg')">PDF → JPG</button>
-  <button class="btn" onclick="showTab('pdftopng')">PDF → PNG</button>
+<h1 title="QuickConvert">QuickConvert</h1>
+
+<div class="buttons-container">
+  <button class="btn" onclick="showTab('cropTab')" aria-controls="cropTab" aria-selected="true">Image Crop</button>
+  <button class="btn" onclick="showTab('jpgpdf')" aria-controls="jpgpdf" aria-selected="false">JPG → PDF</button>
+  <button class="btn" onclick="showTab('pngpdf')" aria-controls="pngpdf" aria-selected="false">PNG → PDF</button>
+  <button class="btn" onclick="showTab('pdftojpg')" aria-controls="pdftojpg" aria-selected="false">PDF → JPG</button>
+  <button class="btn" onclick="showTab('pdftopng')" aria-controls="pdftopng" aria-selected="false">PDF → PNG</button>
 </div>
 
 <!-- Crop Tab -->
-<div id="cropTab" class="tab active">
+<div id="cropTab" class="tab active" role="tabpanel" aria-labelledby="cropTab-btn">
   <h2><span class="tab-icon"></span>📐 Image Crop with Standard Sizes & Manual Drag</h2>
-  <input type="file" accept="image/*" id="cropInput" />
+  <input type="file" accept="image/*" id="cropInput" aria-label="Upload image to crop" />
   <br />
   <label for="stdSize">Select standard size (will set fixed aspect ratio & auto crop box):</label><br />
   <select id="stdSize" title="Choose a standard size">
@@ -194,51 +287,51 @@
   </select>
   <br />
   <label for="outputFormat">Select output format:</label><br />
-  <select id="outputFormat">
+  <select id="outputFormat" aria-label="Select output format">
     <option value="jpeg">JPEG</option>
     <option value="png">PNG</option>
     <option value="pdf">PDF</option>
   </select>
   <br /><br />
 
-  <div id="cropContainer">
+  <div id="cropContainer" aria-live="polite">
     <img id="croppingImage" alt="Upload an image to crop" />
   </div>
 
   <br />
-  <button class="btn" onclick="cropAndDownload()">Crop & Download</button>
+  <button class="btn" onclick="cropAndDownload()" aria-label="Crop image and download">Crop & Download</button>
 
-  <div id="croppedPreview"></div>
+  <div id="croppedPreview" aria-live="polite"></div>
 </div>
 
 <!-- JPG to PDF -->
-<div id="jpgpdf" class="tab">
+<div id="jpgpdf" class="tab" role="tabpanel" aria-labelledby="jpgpdf-btn">
   <h2><span class="tab-icon"></span>📸 JPG to PDF</h2>
-  <input type="file" multiple accept="image/jpeg" id="jpgInput" /><br />
-  <button class="btn" onclick="convertImagesToPDF('jpgInput')">Convert & Download</button>
+  <input type="file" multiple accept="image/jpeg" id="jpgInput" aria-label="Upload JPG images" /><br />
+  <button class="btn" onclick="convertImagesToPDF('jpgInput')" aria-label="Convert JPG images to PDF and download">Convert & Download</button>
 </div>
 
 <!-- PNG to PDF -->
-<div id="pngpdf" class="tab">
+<div id="pngpdf" class="tab" role="tabpanel" aria-labelledby="pngpdf-btn">
   <h2><span class="tab-icon"></span>🖼️ PNG to PDF</h2>
-  <input type="file" multiple accept="image/png" id="pngInput" /><br />
-  <button class="btn" onclick="convertImagesToPDF('pngInput')">Convert & Download</button>
+  <input type="file" multiple accept="image/png" id="pngInput" aria-label="Upload PNG images" /><br />
+  <button class="btn" onclick="convertImagesToPDF('pngInput')" aria-label="Convert PNG images to PDF and download">Convert & Download</button>
 </div>
 
 <!-- PDF to JPG -->
-<div id="pdftojpg" class="tab">
+<div id="pdftojpg" class="tab" role="tabpanel" aria-labelledby="pdftojpg-btn">
   <h2><span class="tab-icon"></span>🔁 PDF to JPG</h2>
-  <input type="file" accept="application/pdf" id="pdfToJpgInput" /><br />
-  <button class="btn" onclick="convertPDF('jpg')">Convert & Show</button><br />
-  <div id="jpgOutput"></div>
+  <input type="file" accept="application/pdf" id="pdfToJpgInput" aria-label="Upload PDF file for JPG conversion" /><br />
+  <button class="btn" onclick="convertPDF('jpg')" aria-label="Convert PDF to JPG and show">Convert & Show</button><br />
+  <div id="jpgOutput" aria-live="polite"></div>
 </div>
 
 <!-- PDF to PNG -->
-<div id="pdftopng" class="tab">
+<div id="pdftopng" class="tab" role="tabpanel" aria-labelledby="pdftopng-btn">
   <h2><span class="tab-icon"></span>🔁 PDF to PNG</h2>
-  <input type="file" accept="application/pdf" id="pdfToPngInput" /><br />
-  <button class="btn" onclick="convertPDF('png')">Convert & Show</button><br />
-  <div id="pngOutput"></div>
+  <input type="file" accept="application/pdf" id="pdfToPngInput" aria-label="Upload PDF file for PNG conversion" /><br />
+  <button class="btn" onclick="convertPDF('png')" aria-label="Convert PDF to PNG and show">Convert & Show</button><br />
+  <div id="pngOutput" aria-live="polite"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
